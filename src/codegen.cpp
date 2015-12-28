@@ -5340,15 +5340,13 @@ static void emit_function(jl_lambda_info_t *lam, jl_llvm_functions_t *declaratio
                 builder.SetInsertPoint(bb);
             }
         }
-        // boundscheck elision
-        else if (is_inbounds(&ctx) && !ctx.boundsCheck.empty() && ctx.boundsCheck.back()) {
-            // skip expression unless it modifies the boundsCheck stack
-            if (jl_is_expr(stmt) && ((jl_expr_t*)stmt)->head == boundscheck_sym) {
-                (void)emit_expr(stmt, &ctx, false, false);
-            }
+        // always emit expressions that update the boundscheck stack
+        else if (jl_is_expr(stmt) && ((jl_expr_t*)stmt)->head == boundscheck_sym) {
+            emit_expr(stmt, &ctx, false, false);
         }
-        else {
-            (void)emit_expr(stmt, &ctx, false, false);
+        // elide bounds check blocks in remaining expressions
+        else if (!is_inbounds(&ctx) || !is_bounds_check_block(&ctx)) {
+            emit_expr(stmt, &ctx, false, false);
         }
     }
 

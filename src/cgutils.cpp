@@ -1341,6 +1341,11 @@ static bool is_inbounds(jl_codectx_t *ctx)
     return inbounds;
 }
 
+static bool is_bounds_check_block(jl_codectx_t *ctx)
+{
+    return !ctx->boundsCheck.empty() && ctx->boundsCheck.back();
+}
+
 #define CHECK_BOUNDS 1
 static Value *emit_bounds_check(const jl_cgval_t &ainfo, jl_value_t *ty, Value *i, Value *len, jl_codectx_t *ctx)
 {
