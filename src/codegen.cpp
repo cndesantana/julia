@@ -246,6 +246,7 @@ static IntegerType *T_uint64;
 static IntegerType *T_char;
 static IntegerType *T_size;
 
+static Type *T_float16; // Used by AArch64 ABI
 static Type *T_float32;
 static Type *T_float64;
 
@@ -5512,6 +5513,7 @@ static void init_julia_llvm_env(Module *m)
     else
         T_size = T_uint32;
     T_psize = PointerType::get(T_size, 0);
+    T_float16 = Type::getHalfTy(getGlobalContext());
     T_float32 = Type::getFloatTy(getGlobalContext());
     T_pfloat32 = PointerType::get(T_float32, 0);
     T_float64 = Type::getDoubleTy(getGlobalContext());
