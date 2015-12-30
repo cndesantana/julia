@@ -2902,9 +2902,6 @@ function inlining_pass(e::Expr, sv, ast)
                 res2 = res[2]::Array{Any,1}
                 if !isempty(res2)
                     prepend!(stmts,res2)
-                    # inlined statements are out-of-bounds by default
-                    unshift!(stmts, Expr(:inbounds, false))
-                    push!(stmts, Expr(:inbounds, :pop))
                     if !has_stmts
                         for stmt in res2
                             if !effect_free(stmt, sv, true)
@@ -2979,6 +2976,9 @@ function inlining_pass(e::Expr, sv, ast)
         res = inlineable(f, e, atype, sv, ast)
         if isa(res,Tuple)
             if isa(res[2],Array)
+                # inlined statements are out-of-bounds by default
+                unshift!(res[2], Expr(:inbounds, false))
+                push!(res[2], Expr(:inbounds, :pop))
                 append!(stmts,res[2])
             end
             res = res[1]
