@@ -2964,8 +2964,6 @@ function inlining_pass(e::Expr, sv, ast)
         end
     end
 
-    has_inbounds_stmts = (findfirst(x -> isa(x,Expr) && x.head === :inbounds, eargs) > 0)
-
     for ninline = 1:100
         ata = Any[exprtype(e.args[i],sv) for i in 2:length(e.args)]
         for a in ata
@@ -2978,13 +2976,9 @@ function inlining_pass(e::Expr, sv, ast)
         res = inlineable(f, e, atype, sv, ast)
         if isa(res,Tuple)
             if isa(res[2],Array) && !isempty(res[2])
-                if has_inbounds_stmts
-                    # inlined statements are out-of-bounds by default,
-                    # but it is unnecessary to manipulate the inbounds
-                    # stack unless it already has some content
-                    unshift!(res[2], Expr(:inbounds, false))
-                    push!(res[2], Expr(:inbounds, :pop))
-                end
+                # inlined statements are out-of-bounds by default
+                unshift!(res[2], Expr(:inbounds, false))
+                push!(res[2], Expr(:inbounds, :pop))
                 append!(stmts,res[2])
             end
             res = res[1]
